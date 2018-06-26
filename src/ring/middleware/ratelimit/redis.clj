@@ -1,20 +1,21 @@
 (ns ring.middleware.ratelimit.redis
   (:require [taoensso.carmine :as car]
-            [taoensso.carmine.connections :as conns])
-  (:use [ring.middleware.ratelimit backend util]))
+            (ring.middleware.ratelimit [backend :as backend]
+                                       [util :as util])))
 
-(deftype RedisBackend [pool spec hashname hourname] Backend
-  (get-limit [self limit k]
+(deftype RedisBackend [pool spec hashname hourname]
+  backend/Backend
+  (backend/get-limit [self limit k]
     (car/with-conn pool spec (car/hincrby hashname k 1)))
-  (reset-limits! [self hour]
+  (backend/reset-limits! [self hour]
     (car/with-conn pool spec
       (car/del hashname)
       (car/set hourname hour)))
-  (get-hour [self]
+  (backend/get-hour [self]
     (Integer/parseInt (car/with-conn pool spec (car/get hourname))))
-  (available? [self]
+  (backend/available? [self]
     (= "PONG" (try (car/with-conn pool spec (car/ping))
-                (catch Throwable _)))))
+                   (catch Throwable _)))))
 
 (defn redis-backend
   ([] (redis-backend (car/make-conn-spec)))
@@ -23,5 +24,5 @@
   ([pool spec hashname]
    (let [backend (RedisBackend. pool spec hashname (str hashname ":hour"))]
      (car/with-conn pool spec
-       (car/set (.hourname backend) (current-hour)))
+       (car/set (.hourname backend) (util/current-hour)))
      backend)))

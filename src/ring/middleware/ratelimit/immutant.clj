@@ -1,22 +1,19 @@
 (ns ring.middleware.ratelimit.immutant
-  (:use [ring.middleware.ratelimit backend]
-        [immutant cache xa]))
+  (:require [ring.middleware.ratelimit.backend :as backend]
+            [immutant.caching :as caching]))
 
-(deftype ImmutantBackend [obj] Backend
-  (get-limit [self limit k]
-    (transaction
-      (if-let [current (get obj k)]
-        (let [newl (inc current)]
-          (put obj k newl)
-          newl)
-        (do
-          (put obj k 1)
-          1))))
-  (reset-limits! [self hour]
-    (delete-all obj)
-    (put obj :hour hour))
-  (get-hour [self] (:hour obj))
-  (available? [self] true))
+(deftype ImmutantBackend [obj]
+  backend/Backend
+  (backend/get-limit [self limit k]
+    (caching/swap-in! obj k (fn [prev]
+                              (if prev
+                                (inc prev)
+                                1))))
+  (backend/reset-limits! [self hour]
+    (.clear obj)
+    (caching/swap-in! :hour (constantly hour)))
+  (backend/get-hour [self] (:hour obj))
+  (backend/available? [self] true))
 
 (defn immutant-backend
   ([] (immutant-backend (cache "ratelimit")))
