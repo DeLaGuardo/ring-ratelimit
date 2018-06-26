@@ -3,17 +3,18 @@
   :url "https://github.com/myfreeweb/ring-ratelimit"
   :license {:name "WTFPL"
             :url "http://www.wtfpl.net/about/"}
-  :dependencies [[org.clojure/clojure "1.5.1"]]
-  :profiles {:dev {:dependencies [[midje "1.5.0"]
-                                  [lein-release "1.0.0"]
-                                  [ring/ring-core "1.2.0"]
-                                  [ring-mock "0.1.3"]
-                                  [http-kit "2.1.5"]
-                                  [compojure "1.1.5"]
-                                  [com.cemerick/friend "0.1.5"]
-                                  [com.taoensso/carmine "2.2.0"]]}}
-  :plugins [[lein-midje "3.0.0"]
-            [lein-release "1.0.0"]]
+  :dependencies [[org.clojure/clojure "1.9.0"]]
+  :profiles {:dev {:dependencies [[midje "1.9.1"]
+                                  [lein-release "1.1.3"]
+                                  [ring/ring-core "1.6.3"]
+                                  [ring-mock "0.1.5"]
+                                  [http-kit "2.3.0"]
+                                  [compojure "1.6.1"]
+                                  [com.cemerick/friend "0.2.3"]
+                                  [com.taoensso/carmine "2.18.1"]
+                                  [commons-codec/commons-codec "1.11"]]}}
+  :plugins [[lein-midje "3.2.1"]
+            [lein-release "1.1.3"]]
   :aliases {"test" ["midje" "ring.middleware.ratelimit-test"]}
   :bootclasspath true
   :lein-release {:deploy-via :lein-deploy}
